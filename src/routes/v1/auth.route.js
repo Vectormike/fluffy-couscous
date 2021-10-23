@@ -210,13 +210,6 @@ module.exports = router;
  *   post:
  *     summary: Reset password
  *     tags: [Auth]
- *     parameters:
- *       - in: query
- *         name: token
- *         required: true
- *         schema:
- *           type: string
- *         description: The reset password token
  *     requestBody:
  *       required: true
  *       content:
@@ -226,13 +219,20 @@ module.exports = router;
  *             required:
  *               - password
  *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               code:
+ *                 type: string
  *               password:
  *                 type: string
  *                 format: password
  *                 minLength: 8
  *                 description: At least one number and one letter
  *             example:
- *               password: password1
+ *               email: fake@example.com
+ *               code: 132432
+ *               password: password0
  *     responses:
  *       "204":
  *         description: No content
