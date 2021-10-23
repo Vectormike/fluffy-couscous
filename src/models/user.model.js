@@ -34,6 +34,9 @@ const userSchema = mongoose.Schema(
       },
       private: true, // used by the toJSON plugin
     },
+    passwordResetToken: {
+      type: String,
+    },
     isEmailVerified: {
       type: Boolean,
       default: false,
