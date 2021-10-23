@@ -1,12 +1,12 @@
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
 const httpStatus = require('http-status');
+const crypto = require('crypto');
 const config = require('../config/config');
 const userService = require('./user.service');
 const { Token } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
-
 /**
  * Generate token
  * @param {ObjectId} userId
@@ -95,10 +95,11 @@ const generateResetPasswordToken = async (email) => {
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, 'No users found with this email');
   }
-  const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
-  const resetPasswordToken = generateToken(user.id, expires, tokenTypes.RESET_PASSWORD);
-  await saveToken(resetPasswordToken, user.id, expires, tokenTypes.RESET_PASSWORD);
-  return resetPasswordToken;
+  const resetPasswordToken = crypto.randomBytes(3).toString('hex');
+  user.passwordResetToken = resetPasswordToken;
+  await user.save();
+  const { name } = user;
+  return { name, resetPasswordToken };
 };
 
 /**
