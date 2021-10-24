@@ -33,7 +33,7 @@ portfolioSchema.plugin(paginate);
  * Check if symbol is taken
  * @returns {Promise<boolean>}
  */
-portfolioSchema.statics.isEmailTaken = async function (symbol, excludeUserId) {
+portfolioSchema.statics.isSymbolTaken = async function (symbol, excludeUserId) {
   const porfolio = await this.findOne({ symbol, _id: { $ne: excludeUserId } });
   return !!porfolio;
 };
