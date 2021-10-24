@@ -12,7 +12,7 @@ components:
           type: string
         role:
           type: string
-          enum: [user, admin]
+          enum: [user]
       example:
         id: 5ebac534954b54139806c112
         email: fake@example.com
@@ -39,6 +39,29 @@ components:
         refresh:
           $ref: '#/components/schemas/Token'
 
+    Portfolio:
+      type: object
+      properties:
+        id:
+          type: string
+        symbol:
+          type: string
+        totalQuantity:
+          type: number
+        equityValue:
+          type: number
+        pricePerShare:
+          type: number
+        user:
+          type: string
+      example:
+        id: 5ebac534954b54139806c112
+        symbol: AMZN
+        totalQuantity: 2
+        equityValue: 100
+        pricePerShare: 50
+        user: 61758b28d9e30c4d5e49d0a6
+
     Error:
       type: object
       properties:
@@ -57,6 +80,15 @@ components:
           example:
             code: 400
             message: Email already taken
+    DuplicateSymbol:
+      description: Symbol already taken
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            message: Symbol already taken
     Unauthorized:
       description: Unauthorized
       content:
