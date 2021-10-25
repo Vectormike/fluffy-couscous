@@ -22,4 +22,12 @@ const createPortfolio = async (portfolioBody, userId) => {
   await portfolio.save();
   return portfolio;
 };
-module.exports = { createPortfolio };
+
+/**
+ * Get Portfolio value
+ * @param {Object} portfolioBody
+ * @returns {Promise<Portfolio>}
+ */
+const getPortfolioValue = async () => {};
+
+module.exports = { createPortfolio, getPortfolioValue };
