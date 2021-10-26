@@ -9,4 +9,10 @@ const createPortfolio = catchAsync(async (req, res) => {
   res.status(httpStatus.CREATED).send({ portfolio });
 });
 
-module.exports = { createPortfolio };
+const getPortfoilioValue = catchAsync(async (req, res) => {
+  const portfolioValue = await portfolioService.getPortfolioValue(req.user._id);
+  // console.log(req.user._id);
+  res.status(httpStatus.CREATED).send({ portfolioValue });
+});
+
+module.exports = { createPortfolio, getPortfoilioValue };
