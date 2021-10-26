@@ -8,6 +8,8 @@ const router = express.Router();
 
 router.route('/create').post(auth(), validate(portfolioValidation.createPortfolio), portfolioController.createPortfolio);
 
+router.route('/getValue/:userID').get(auth(), portfolioController.getPortfoilioValue);
+
 module.exports = router;
 
 /**
@@ -64,4 +66,35 @@ module.exports = router;
  *                   $ref: '#/components/schemas/Portfolio'
  *       "400":
  *         $ref: '#/components/responses/DuplicateSymbol'
+ */
+
+/**
+ * @swagger
+ * /getValue/{userID}:
+ *   get:
+ *     summary: Get Portfolio value
+ *     description: Logged in users can fetch only their own portfolio value.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userID
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User id
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *                $ref: '#/components/schemas/User'
+ *       "401":
+ *         $ref: '#/components/responses/Unauthorized'
+ *       "403":
+ *         $ref: '#/components/responses/Forbidden'
+ *       "404":
+ *         $ref: '#/components/responses/NotFound'
  */

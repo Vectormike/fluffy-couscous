@@ -40,7 +40,7 @@ const getPortfolioValue = async (userID) => {
   const portfolioValue = values.reduce(reducer);
 
   // return
-  return portfolioValue;
+  return { portfolioValue, ...portfolio };
 };
 
 module.exports = { createPortfolio, getPortfolioValue };
