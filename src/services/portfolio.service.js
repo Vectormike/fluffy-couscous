@@ -40,7 +40,29 @@ const getPortfolioValue = async (userID) => {
   const portfolioValue = values.reduce(reducer);
 
   // return
+
   return { portfolioValue, ...portfolio };
 };
 
-module.exports = { createPortfolio, getPortfolioValue };
+/**
+ * Get Portfolio value
+ * @param {Object} portfolioBody
+ * @returns {Promise<Portfolio>}
+ */
+const getLoan = async (userID) => {
+  // fetch portfolio based on user
+  const portfolio = await Portfolio.find({ user: userID });
+
+  // add equity values
+  const reducer = (previousValue, currentValue) => previousValue + currentValue;
+
+  const values = portfolio.map((data) => data.equityValue);
+
+  const portfolioValue = values.reduce(reducer);
+
+  // return
+
+  return { portfolioValue, ...portfolio };
+};
+
+module.exports = { createPortfolio, getPortfolioValue, getLoan };
