@@ -11,16 +11,19 @@ const loanSchema = mongoose.Schema(
     loanAmount: {
       type: String,
       required: true,
-      trim: true,
     },
     loanPeriod: {
       type: Number,
       required: true,
     },
+    loanBalancePaid: {
+      type: String,
+      default: 'Loan not paid yet!',
+    },
     status: {
       type: String,
       required: true,
-      default: 'pending',
+      default: 'active',
     },
   },
   {

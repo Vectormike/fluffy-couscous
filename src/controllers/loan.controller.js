@@ -4,7 +4,7 @@ const catchAsync = require('../utils/catchAsync');
 const { loanService, emailService } = require('../services');
 
 const createLoan = catchAsync(async (req, res) => {
-  const loan = await loanService.getLoan(req.body, req.user._id);
+  const loan = await loanService.createLoan(req.body, req.user._id);
 
   // Send email for confirmation
 
@@ -19,4 +19,14 @@ const createLoan = catchAsync(async (req, res) => {
       });
 });
 
-module.exports = { createLoan };
+const getLoan = catchAsync(async (req, res) => {
+  const loan = await loanService.getLoanBalance(req.user._id);
+
+  // Send email for confirmation
+
+  res.status(httpStatus.OK).send({
+    loan,
+  });
+});
+
+module.exports = { createLoan, getLoan };
