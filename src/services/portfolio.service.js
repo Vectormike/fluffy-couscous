@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
-const { Portfolio } = require('../models');
+const { Portfolio, Loan } = require('../models');
 const ApiError = require('../utils/ApiError');
+const percentage = require('../utils/percentage');
 const logger = require('../config/logger');
 
 /**
@@ -44,25 +45,4 @@ const getPortfolioValue = async (userID) => {
   return { portfolioValue, ...portfolio };
 };
 
-/**
- * Get Portfolio value
- * @param {Object} portfolioBody
- * @returns {Promise<Portfolio>}
- */
-const getLoan = async (userID) => {
-  // fetch portfolio based on user
-  const portfolio = await Portfolio.find({ user: userID });
-
-  // add equity values
-  const reducer = (previousValue, currentValue) => previousValue + currentValue;
-
-  const values = portfolio.map((data) => data.equityValue);
-
-  const portfolioValue = values.reduce(reducer);
-
-  // return
-
-  return { portfolioValue, ...portfolio };
-};
-
-module.exports = { createPortfolio, getPortfolioValue, getLoan };
+module.exports = { createPortfolio, getPortfolioValue };
