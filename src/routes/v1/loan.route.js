@@ -8,5 +8,6 @@ const router = express.Router();
 
 router.route('/createLoan/').post(auth(), validate(loanValidation.getLoan), loanController.createLoan);
 router.route('/getLoan/').get(auth(), loanController.getLoan);
+router.route('/getPaymentSchedule/').get(auth(), loanController.getLoanPaymentSchedule);
 
 module.exports = router;

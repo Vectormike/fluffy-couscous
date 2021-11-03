@@ -6,6 +6,7 @@ const { Portfolio, Loan } = require('../models');
 const { getPortfolioValue } = require('./portfolio.service');
 const ApiError = require('../utils/ApiError');
 const percentage = require('../utils/percentage');
+const paymentSchedule = require('../utils/paymentSchedule');
 const logger = require('../config/logger');
 
 /**
@@ -57,4 +58,24 @@ const getLoanBalance = async (userID) => {
   return { balance: loanDetails.loanBalancePaid, loan: loanDetails.loanAmount };
 };
 
-module.exports = { createLoan, getLoanBalance };
+/**
+ * Get loan payment schedule
+ * @param {Object}
+ * @returns {Promise<>}
+ */
+const getLoanPaymentSchedule = async (userID) => {
+  // Fetch Loan details
+  const loanDetails = await Loan.findOne({ user: userID, status: 'active' });
+  if (!loanDetails) {
+    throw new Error('Loan has been fully paid');
+  }
+
+  const { loanAmount, loanBalancePaid, loanPeriod } = loanDetails;
+
+  // Get Paymnet schedule
+  const payment = paymentSchedule(loanAmount, loanPeriod);
+
+  return { loanAmount, loanPeriod, payment };
+};
+
+module.exports = { createLoan, getLoanBalance, getLoanPaymentSchedule };
