@@ -20,10 +20,16 @@ const loanSchema = mongoose.Schema(
       type: String,
       default: 'Loan not paid yet!',
     },
+    paymentSchedule: {
+      type: Number,
+    },
     status: {
       type: String,
       required: true,
       default: 'active',
+    },
+    paymentRef: {
+      type: String,
     },
   },
   {

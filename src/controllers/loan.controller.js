@@ -39,4 +39,24 @@ const getLoanPaymentSchedule = catchAsync(async (req, res) => {
   });
 });
 
-module.exports = { createLoan, getLoan, getLoanPaymentSchedule };
+const payLoan = catchAsync(async (req, res) => {
+  const response = await loanService.payLoan(req.body, req.user._id);
+
+  // Send email for confirmation
+
+  res.status(httpStatus.OK).send({
+    response,
+  });
+});
+
+const completeTransaction = catchAsync(async (req, res) => {
+  const response = await loanService.completeTransaction(req.body, req.user._id);
+
+  // Send email for confirmation
+
+  res.status(httpStatus.OK).send({
+    response,
+  });
+});
+
+module.exports = { createLoan, getLoan, getLoanPaymentSchedule, payLoan, completeTransaction };

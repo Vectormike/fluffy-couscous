@@ -1,8 +1,16 @@
+/* eslint-disable camelcase */
+/* eslint-disable eqeqeq */
+/* eslint-disable no-console */
 /* eslint-disable prefer-const */
 /* eslint-disable no-const-assign */
 /* eslint-disable no-unused-vars */
 const httpStatus = require('http-status');
-const { Portfolio, Loan } = require('../models');
+const Flutterwave = require('flutterwave-node-v3');
+const open = require('open');
+const config = require('../config/config');
+
+const flw = new Flutterwave(config.flutterwave.public, config.flutterwave.secret);
+const { Portfolio, Loan, User } = require('../models');
 const { getPortfolioValue } = require('./portfolio.service');
 const ApiError = require('../utils/ApiError');
 const percentage = require('../utils/percentage');
@@ -72,10 +80,93 @@ const getLoanPaymentSchedule = async (userID) => {
 
   const { loanAmount, loanBalancePaid, loanPeriod } = loanDetails;
 
-  // Get Paymnet schedule
+  // Get Payment schedule
   const payment = paymentSchedule(loanAmount, loanPeriod);
+
+  loanDetails.paymentSchedule = payment;
+  loanDetails.save();
 
   return { loanAmount, loanPeriod, payment };
 };
 
-module.exports = { createLoan, getLoanBalance, getLoanPaymentSchedule };
+/**
+ * Get loan payment schedule
+ * @param {Object}
+ * @returns {Promise<>}
+ */
+const payLoan = async (loanBody, userID) => {
+  try {
+    const { phoneNumber, accountNumber, bank, pin, card_number, cvv, expiry_year, expiry_month } = loanBody;
+
+    const loanDetails = await Loan.findOne({ user: userID, status: 'active' });
+    const userDetails = await User.findOne({ _id: userID });
+
+    const payload = {
+      country: 'NG',
+    };
+    // const response = await flw.Bank.country(payload);
+
+    // const bankCode = response.data.find((code) => code.name == bank);
+    // // console.log(bankCode.code);
+
+    const payPayLoad = {
+      phone_number: phoneNumber,
+      card_number,
+      cvv,
+      expiry_month,
+      expiry_year,
+      currency: 'NGN',
+      amount: loanDetails.paymentSchedule,
+      enckey: config.flutterwave.encKey,
+      authorization: {
+        mode: 'pin',
+        pin,
+      },
+      tx_ref: 'MC-MC-1585230ew9v5050e8', // This is a unique reference, unique to the particular transaction being carried out. It is generated when it is not provided by the merchant for every transaction.
+      email: userDetails.email,
+      fullname: userDetails.name,
+    };
+
+    const chargeResp = await flw.Charge.card(payPayLoad);
+    console.log(chargeResp);
+
+    loanDetails.paymentRef = chargeResp.data.flw_ref;
+
+    if (chargeResp.status != 'error') {
+      console.log('1');
+      if (loanDetails.loanBalancePaid == 'Loan not paid yet!') {
+        loanDetails.loanBalancePaid = loanDetails.paymentSchedule;
+        loanDetails.save();
+        return;
+      }
+      const newBalance = loanDetails.loanBalancePaid + loanDetails.paymentSchedule;
+      loanDetails.loanBalancePaid = newBalance;
+      loanDetails.save();
+
+      return chargeResp.status.data;
+    }
+    console.log('2');
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const completeTransaction = async (loanBody, userID) => {
+  try {
+    const loanDetails = await Loan.findOne({ user: userID, status: 'active' });
+
+    const callValidate = await flw.Charge.validate({
+      otp: loanBody.otp,
+      flw_ref: loanDetails.paymentRef,
+    });
+    console.log(callValidate);
+    if (callValidate.message == 'Charge validated') {
+      loanDetails.status = 'inactive';
+      loanDetails.save();
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+module.exports = { createLoan, getLoanBalance, getLoanPaymentSchedule, payLoan, completeTransaction };
