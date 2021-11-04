@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-expressions */
+/* eslint-disable no-plusplus */
 /* eslint-disable camelcase */
 /* eslint-disable eqeqeq */
 /* eslint-disable no-console */
@@ -96,14 +98,11 @@ const getLoanPaymentSchedule = async (userID) => {
  */
 const payLoan = async (loanBody, userID) => {
   try {
-    const { phoneNumber, accountNumber, bank, pin, card_number, cvv, expiry_year, expiry_month } = loanBody;
+    const { phoneNumber, pin, card_number, cvv, expiry_year, expiry_month } = loanBody;
 
     const loanDetails = await Loan.findOne({ user: userID, status: 'active' });
     const userDetails = await User.findOne({ _id: userID });
 
-    const payload = {
-      country: 'NG',
-    };
     // const response = await flw.Bank.country(payload);
 
     // const bankCode = response.data.find((code) => code.name == bank);
@@ -128,12 +127,10 @@ const payLoan = async (loanBody, userID) => {
     };
 
     const chargeResp = await flw.Charge.card(payPayLoad);
-    console.log(chargeResp);
 
     loanDetails.paymentRef = chargeResp.data.flw_ref;
 
     if (chargeResp.status != 'error') {
-      console.log('1');
       if (loanDetails.loanBalancePaid == 'Loan not paid yet!') {
         loanDetails.loanBalancePaid = loanDetails.paymentSchedule;
         loanDetails.save();
@@ -145,9 +142,9 @@ const payLoan = async (loanBody, userID) => {
 
       return chargeResp.status.data;
     }
-    console.log('2');
   } catch (error) {
-    console.log(error);
+    logger.error(error);
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Unable to pay loan');
   }
 };
 
@@ -161,11 +158,12 @@ const completeTransaction = async (loanBody, userID) => {
     });
     console.log(callValidate);
     if (callValidate.message == 'Charge validated') {
-      loanDetails.status = 'inactive';
+      loanDetails.loanPeriod == 0 ? (loanDetails.status = 'inactive') : loanDetails.loanPeriod--;
       loanDetails.save();
     }
   } catch (error) {
-    console.log(error);
+    logger.error(error);
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Transaction unsucessful!');
   }
 };
 
