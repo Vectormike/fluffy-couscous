@@ -41,7 +41,6 @@ const getLoanPaymentSchedule = catchAsync(async (req, res) => {
 
 const payLoan = catchAsync(async (req, res) => {
   const response = await loanService.payLoan(req.body, req.user._id);
-
   // Send email for confirmation
 
   res.status(httpStatus.OK).send({
