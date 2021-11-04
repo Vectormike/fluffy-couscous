@@ -61,4 +61,9 @@ module.exports = {
     },
     from: envVars.EMAIL_FROM,
   },
+  flutterwave: {
+    public: envVars.FLUTTERWAVE_PUBLIC_KEY,
+    secret: envVars.FLUTTERWAVE_SECRET_KEY,
+    encKey: envVars.FLUTTERWAVE_ENCRYPTION_KEY,
+  },
 };
