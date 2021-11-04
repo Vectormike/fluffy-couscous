@@ -97,55 +97,48 @@ const getLoanPaymentSchedule = async (userID) => {
  * @returns {Promise<>}
  */
 const payLoan = async (loanBody, userID) => {
-  try {
-    const { phoneNumber, pin, card_number, cvv, expiry_year, expiry_month } = loanBody;
+  const { phoneNumber, pin, card_number, cvv, expiry_year, expiry_month } = loanBody;
 
-    const loanDetails = await Loan.findOne({ user: userID, status: 'active' });
-    const userDetails = await User.findOne({ _id: userID });
+  const loanDetails = await Loan.findOne({ user: userID, status: 'active' });
+  const userDetails = await User.findOne({ _id: userID });
 
-    // const response = await flw.Bank.country(payload);
+  const payPayLoad = {
+    phone_number: phoneNumber,
+    card_number,
+    cvv,
+    expiry_month,
+    expiry_year,
+    currency: 'NGN',
+    amount: loanDetails.paymentSchedule,
+    enckey: config.flutterwave.encKey,
+    authorization: {
+      mode: 'pin',
+      pin,
+    },
+    tx_ref: 'MC-MC-1585230ew9v5050e8', // This is a unique reference, unique to the particular transaction being carried out. It is generated when it is not provided by the merchant for every transaction.
+    email: userDetails.email,
+    fullname: userDetails.name,
+  };
 
-    // const bankCode = response.data.find((code) => code.name == bank);
-    // // console.log(bankCode.code);
+  const chargeResp = await flw.Charge.card(payPayLoad);
 
-    const payPayLoad = {
-      phone_number: phoneNumber,
-      card_number,
-      cvv,
-      expiry_month,
-      expiry_year,
-      currency: 'NGN',
-      amount: loanDetails.paymentSchedule,
-      enckey: config.flutterwave.encKey,
-      authorization: {
-        mode: 'pin',
-        pin,
-      },
-      tx_ref: 'MC-MC-1585230ew9v5050e8', // This is a unique reference, unique to the particular transaction being carried out. It is generated when it is not provided by the merchant for every transaction.
-      email: userDetails.email,
-      fullname: userDetails.name,
-    };
+  loanDetails.paymentRef = chargeResp.data.flw_ref;
 
-    const chargeResp = await flw.Charge.card(payPayLoad);
-
-    loanDetails.paymentRef = chargeResp.data.flw_ref;
-
-    if (chargeResp.status != 'error') {
-      if (loanDetails.loanBalancePaid == 'Loan not paid yet!') {
-        loanDetails.loanBalancePaid = loanDetails.paymentSchedule;
-        loanDetails.save();
-        return;
-      }
-      const newBalance = loanDetails.loanBalancePaid + loanDetails.paymentSchedule;
-      loanDetails.loanBalancePaid = newBalance;
+  if (chargeResp.status != 'error') {
+    if (loanDetails.loanBalancePaid == 'Loan not paid yet!') {
+      loanDetails.loanBalancePaid = loanDetails.paymentSchedule;
       loanDetails.save();
-
-      return chargeResp.status.data;
+      return;
     }
-  } catch (error) {
-    logger.error(error);
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Unable to pay loan');
+
+    const newBalance = Number(loanDetails.loanBalancePaid) + Number(loanDetails.paymentSchedule);
+    loanDetails.loanBalancePaid = newBalance;
+    loanDetails.save();
+
+    return chargeResp.status.data;
   }
+  logger.error(chargeResp, 'Hi');
+  throw new ApiError(httpStatus.UNAUTHORIZED, 'Unable to pay loan');
 };
 
 const completeTransaction = async (loanBody, userID) => {
@@ -156,10 +149,10 @@ const completeTransaction = async (loanBody, userID) => {
       otp: loanBody.otp,
       flw_ref: loanDetails.paymentRef,
     });
-    console.log(callValidate);
     if (callValidate.message == 'Charge validated') {
       loanDetails.loanPeriod == 0 ? (loanDetails.status = 'inactive') : loanDetails.loanPeriod--;
       loanDetails.save();
+      return callValidate;
     }
   } catch (error) {
     logger.error(error);
