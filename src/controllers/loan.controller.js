@@ -41,6 +41,7 @@ const getLoanPaymentSchedule = catchAsync(async (req, res) => {
 
 const payLoan = catchAsync(async (req, res) => {
   const response = await loanService.payLoan(req.body, req.user._id);
+
   // Send email for confirmation
 
   res.status(httpStatus.OK).send({
@@ -54,6 +55,7 @@ const completeTransaction = catchAsync(async (req, res) => {
   // Send email for confirmation
 
   res.status(httpStatus.OK).send({
+    message: `Loan has been paid, ${response.loanPeriod} left to finish payment.`,
     response,
   });
 });

@@ -135,7 +135,7 @@ const payLoan = async (loanBody, userID) => {
     loanDetails.loanBalancePaid = newBalance;
     loanDetails.save();
 
-    return chargeResp.status.data;
+    return loanDetails;
   }
   logger.error(chargeResp, 'Hi');
   throw new ApiError(httpStatus.UNAUTHORIZED, 'Unable to pay loan');
@@ -152,7 +152,7 @@ const completeTransaction = async (loanBody, userID) => {
     if (callValidate.message == 'Charge validated') {
       loanDetails.loanPeriod == 0 ? (loanDetails.status = 'inactive') : loanDetails.loanPeriod--;
       loanDetails.save();
-      return callValidate;
+      return { loanDetails, callValidate };
     }
   } catch (error) {
     logger.error(error);
