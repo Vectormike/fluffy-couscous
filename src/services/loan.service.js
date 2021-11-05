@@ -65,7 +65,7 @@ const getLoanBalance = async (userID) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Loan not found');
   }
 
-  return { balance: loanDetails.loanBalancePaid, loan: loanDetails.loanAmount };
+  return { balance: loanDetails.loanBalancePaid, loan: loanDetails };
 };
 
 /**

@@ -70,11 +70,11 @@ module.exports = router;
 
 /**
  * @swagger
- * /getValue/{userID}:
+ * portfolio/getValue/{userID}:
  *   get:
  *     summary: Get Portfolio value
  *     description: Logged in users can fetch only their own portfolio value.
- *     tags: [Users]
+ *     tags: [Portfolio]
  *     security:
  *       - bearerAuth: []
  *     parameters:

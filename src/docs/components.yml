@@ -62,6 +62,43 @@ components:
         pricePerShare: 50
         user: 61758b28d9e30c4d5e49d0a6
 
+    Loan:
+      type: object
+      properties:
+        id:
+          type: string
+        loanPeriod:
+          type: number
+        loanAmount:
+          type: string
+        user:
+          type: string
+        status:
+          type: number
+        loanBalancePaid:
+          type: string
+      example:
+        id: 6184dde9cd0672977be48a12
+        loanPeriod: 12
+        loanAmount: 42.00
+        user: 100
+        status: 50
+        loanBalancePaid: 6184dcc0cd0672977be489f5
+
+    LoanSchedule:
+      type: object
+      properties:
+        payment:
+          type: number
+        loanPeriod:
+          type: number
+        loanAmount:
+          type: string
+      example:
+        loanAmount: 42.00
+        loanPeriod: 12
+        payment: 3.5
+
     Error:
       type: object
       properties:
