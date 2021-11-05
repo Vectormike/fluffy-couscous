@@ -6,11 +6,9 @@ const swaggerDef = {
   info: {
     title: 'Trove API documentation',
     version,
-    license: {
-      name: 'MIT',
-      url: 'https://github.com/hagopj13/node-express-boilerplate/blob/master/LICENSE',
-    },
   },
+  host: 'morning-tundra-25451.herokuapp.com',
+  basePath: '/',
   servers: [
     {
       url: `https://morning-tundra-25451.herokuapp.com/v1/docs`,
